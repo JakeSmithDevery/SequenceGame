@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SequenceGame</string>
+    <string name="red_circle">Red Circle</string>
+    <string name="blue_circle">Blue Circle</string>
+    <string name="green_circle">Green Circle</string>
+    <string name="yellow_circle">Yellow Circle</string>
 </resources>
