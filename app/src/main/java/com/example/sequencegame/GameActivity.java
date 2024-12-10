@@ -1,11 +1,13 @@
 package com.example.sequencegame;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,10 +21,12 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     private List<String> sequence;
     private int currentIndex = 0;
     private int score = 0;
+    private boolean isProcessing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_game);
 
         sequence = getIntent().getStringArrayListExtra("sequence");
@@ -43,32 +47,53 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         sensorManager.unregisterListener(this);
     }
 
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            accelerometerValues = event.values;
+            if (isProcessing) {
+                // If we are in the buffer period, ignore the event
+                return;
+            }
 
+            accelerometerValues = event.values;
             String direction = detectTilt();
-            if (direction != null && direction.equals(sequence.get(currentIndex))) {
+            if (direction == null) {
+                return; // Skip if no tilt is detected
+            }
+
+            Log.d("GameActivity", "Detected direction: " + direction);
+            Log.d("GameActivity", "Expected direction: " + sequence.get(currentIndex));
+
+            if (direction.equals(sequence.get(currentIndex))) {
                 currentIndex++;
+                score++;
                 if (currentIndex == sequence.size()) {
                     score += sequence.size();
                     Intent intent = new Intent(GameActivity.this, SequenceActivity.class);
+                    //intent.putExtra("SequenceLength", sequence.get(currentIndex) + 2);
+                    //intent.putExtra("score", score); // Pass the score
                     startActivity(intent);
+
                 }
-            } else if (direction != null) {
+            } else {
                 Intent intent = new Intent(GameActivity.this, GameOverActivity.class);
                 intent.putExtra("score", score);
+                Log.d("GameActivity", "Player lost. Final score: " + score);
                 startActivity(intent);
             }
+
+            // Set the buffer to block further processing for 2 seconds
+            isProcessing = true;
+            new android.os.Handler().postDelayed(() -> isProcessing = false, 500); // 2-second delay
         }
     }
 
     private String detectTilt() {
-        if (accelerometerValues[0] > 5) return "Red";       // Tilt left
-        if (accelerometerValues[0] < -5) return "Blue";      // Tilt right
-        if (accelerometerValues[1] > 5) return "Green";     // Tilt up
-        if (accelerometerValues[1] < -5) return "Yellow";   // Tilt down
+        if (accelerometerValues[0] > 5) return "Blue";       // Tilt down
+        if (accelerometerValues[0] < -5) return "Red";      // Tilt up
+        if (accelerometerValues[1] > 5) return "Yellow";     // Tilt right
+        if (accelerometerValues[1] < -5) return "Green";   // Tilt left
         return null;
     }
 
