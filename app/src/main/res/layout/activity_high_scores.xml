@@ -14,16 +14,17 @@
         android:textSize="32sp"
         android:layout_marginBottom="20dp" />
 
-    <ListView
-        android:id="@+id/lvHighScores"
-        android:layout_width="match_parent"
-        android:layout_height="307dp" />
-
     <Button
         android:id="@+id/btnBackToMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:text="Play Again" />
+
+    <ListView
+        android:id="@+id/lvHighScores"
+        android:layout_width="560dp"
+        android:layout_height="200dp" />
 
     <Button
         android:id="@+id/btnSaveScore"

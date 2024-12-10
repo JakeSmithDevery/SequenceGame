@@ -31,7 +31,7 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put("name", name);
         values.put("score", score);
         db.insert("scores", null, values);
-        db.close();  // close the database after the operation
+
     }
 
     public Cursor getHighScores() {
