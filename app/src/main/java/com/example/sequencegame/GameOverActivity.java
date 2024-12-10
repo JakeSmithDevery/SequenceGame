@@ -24,16 +24,20 @@ public class GameOverActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_game_over);
 
+        Button playButton = findViewById(R.id.btnPlayAgain);
+        playButton.setOnClickListener(v -> {
+            Intent intent = new Intent(GameOverActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
+
         int score = getIntent().getIntExtra("score", 0);
         TextView scoreText = findViewById(R.id.tvFinalScore);
         scoreText.setText("Score: " + score);
 
         dbHelper = new DBHelper(this);
 
-        // Check if score is among top 5
+        // check if score is in top 5
         if (isTop5Score(score)) {
-            // Show a dialog or input field for the player to enter their name
-            // In this case, I assume a simple prompt for the name.
             promptForNameAndSaveScore(score);
         }
 
@@ -52,24 +56,24 @@ public class GameOverActivity extends AppCompatActivity {
             if (cursor != null) {
                 List<Integer> highScores = new ArrayList<>();
 
-                // Ensure columns exist
+                // ensure columns exist
                 int scoreIndex = cursor.getColumnIndex("score");
                 if (scoreIndex == -1) {
                     throw new IllegalArgumentException("Column 'score' not found in the database.");
                 }
 
-                // Collect scores
+                // get scores
                 while (cursor.moveToNext()) {
                     highScores.add(cursor.getInt(scoreIndex));
                 }
 
-                // Check if the current score qualifies for top 5
+                // check if the current score is in top 5
                 Collections.sort(highScores, Collections.reverseOrder());
                 isTop5 = highScores.size() < 5 || highScores.get(4) < score;
             }
         } finally {
             if (cursor != null) {
-                cursor.close(); // Always close the cursor to prevent memory leaks
+                cursor.close(); //close the cursor to prevent memory leaks
             }
         }
 
@@ -77,11 +81,11 @@ public class GameOverActivity extends AppCompatActivity {
     }
 
     private void promptForNameAndSaveScore(int score) {
-        // Use an AlertDialog or another input method to ask for the player's name
+        // ask for player name
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter Your Name");
 
-        // Use a simple EditText to enter the name
+        //EditText to enter the name
         final EditText input = new EditText(this);
         builder.setView(input);
 

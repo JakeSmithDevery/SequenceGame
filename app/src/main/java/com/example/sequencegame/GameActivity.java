@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
     private SensorManager sensorManager;
@@ -30,7 +31,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_game);
 
-        score = getIntent().getIntExtra("score", 0); // Initialize the score
+        score = getIntent().getIntExtra("score", 0);
         sequence = getIntent().getStringArrayListExtra("sequence");
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -60,7 +61,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             accelerometerValues = event.values;
             String direction = detectTilt();
             if (direction == null) {
-                return; // Skip if no tilt is detected
+                return;//skip if no tilt
             }
 
             Log.d("GameActivity", "Detected direction: " + direction);
@@ -68,37 +69,49 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
 
             if (direction.equals(sequence.get(currentIndex))) {
                 currentIndex++;
-                score++;
-
-                // Check if the player has completed the entire sequence
+                //if the player has completed the entire sequence
                 if (currentIndex == sequence.size()) {
-                    // Award bonus for completing the sequence
-                    score += sequence.size(); // You can adjust this logic based on your game's rules
+                    // award points for completing the sequence
+                    score += sequence.size();
+
+                    // pass sequence to the next activity
                     Intent intent = new Intent(GameActivity.this, SequenceActivity.class);
-                    intent.putExtra("score", score); // Pass the score to the next sequence
+                    intent.putStringArrayListExtra("sequence", (ArrayList<String>) sequence); // pass updated sequence
+                    intent.putExtra("score", score); // pass updated score
                     startActivity(intent);
-                    finish(); // Finish this activity so the player moves to the next one
+                    finish(); // finish this activity
                 }
             } else {
-                // If the player fails to match the correct sequence, go to the Game Over screen
+                // if the player fails go to the game over screen
                 Intent intent = new Intent(GameActivity.this, GameOverActivity.class);
-                intent.putExtra("score", score); // Pass the score to GameOverActivity
+                intent.putExtra("score", score); // pass score to GameOverActivity
                 startActivity(intent);
-                finish(); // Ensure GameActivity is removed from the stack
+                finish(); // ensure GameActivity is removed
             }
 
-            // Set the buffer to block further processing for 500 milliseconds
+
+            // set the buffer
             isProcessing = true;
             new android.os.Handler().postDelayed(() -> isProcessing = false, 500);
         }
     }
 
     private String detectTilt() {
-        if (accelerometerValues[0] > 5) return "Blue";       // Tilt down
-        if (accelerometerValues[0] < -5) return "Red";      // Tilt up
-        if (accelerometerValues[1] > 5) return "Yellow";     // Tilt right
-        if (accelerometerValues[1] < -5) return "Green";   // Tilt left
+        if (accelerometerValues[0] > 5) return "Blue";  // Tilt down
+        if (accelerometerValues[0] < -5) return "Red";  // Tilt up
+        if (accelerometerValues[1] > 5) return "Yellow";// Tilt right
+        if (accelerometerValues[1] < -5) return "Green";// Tilt left
         return null;
+    }
+
+    private void extendSequence(int length) {
+        String[] colors = {"Red", "Blue", "Green", "Yellow"};
+        Random random = new Random();
+
+        // add length new colors
+        for (int i = 0; i < length; i++) {
+            sequence.add(colors[random.nextInt(colors.length)]); // add random color to the sequence
+        }
     }
 
     @Override
