@@ -24,7 +24,7 @@ public class SequenceActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_sequence);
 
-
+        int score = getIntent().getIntExtra("score", 0); // Receive the score from the intent
 
         sequenceText = findViewById(R.id.tvSequence);
         generateSequence(SequenceLenght); // Initial sequence of 4 colors
@@ -32,13 +32,12 @@ public class SequenceActivity extends AppCompatActivity {
 
         new Handler().postDelayed(() -> {
             Intent intent = new Intent(SequenceActivity.this, GameActivity.class);
-            //intent.putExtra("score", getIntent().getIntExtra("score", 0)); // Pass the score back
-            //SequenceLenght = getIntent().getIntExtra("SequenceLength", 0);
+            intent.putExtra("score", score); // Pass the score to GameActivity
             intent.putStringArrayListExtra("sequence", (ArrayList<String>) currentSequence);
             startActivity(intent);
+            finish();
         }, 3000); // Show sequence for 3 seconds
     }
-
     private void generateSequence(int length) {
         Random random = new Random();
         currentSequence.clear();

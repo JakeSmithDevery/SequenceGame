@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameActivity extends AppCompatActivity implements SensorEventListener {
@@ -29,6 +30,7 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         setContentView(R.layout.activity_game);
 
+        score = getIntent().getIntExtra("score", 0); // Initialize the score
         sequence = getIntent().getStringArrayListExtra("sequence");
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -52,7 +54,6 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             if (isProcessing) {
-                // If we are in the buffer period, ignore the event
                 return;
             }
 
@@ -68,24 +69,27 @@ public class GameActivity extends AppCompatActivity implements SensorEventListen
             if (direction.equals(sequence.get(currentIndex))) {
                 currentIndex++;
                 score++;
-                if (currentIndex == sequence.size()) {
-                    score += sequence.size();
-                    Intent intent = new Intent(GameActivity.this, SequenceActivity.class);
-                    //intent.putExtra("SequenceLength", sequence.get(currentIndex) + 2);
-                    //intent.putExtra("score", score); // Pass the score
-                    startActivity(intent);
 
+                // Check if the player has completed the entire sequence
+                if (currentIndex == sequence.size()) {
+                    // Award bonus for completing the sequence
+                    score += sequence.size(); // You can adjust this logic based on your game's rules
+                    Intent intent = new Intent(GameActivity.this, SequenceActivity.class);
+                    intent.putExtra("score", score); // Pass the score to the next sequence
+                    startActivity(intent);
+                    finish(); // Finish this activity so the player moves to the next one
                 }
             } else {
+                // If the player fails to match the correct sequence, go to the Game Over screen
                 Intent intent = new Intent(GameActivity.this, GameOverActivity.class);
-                intent.putExtra("score", score);
-                Log.d("GameActivity", "Player lost. Final score: " + score);
+                intent.putExtra("score", score); // Pass the score to GameOverActivity
                 startActivity(intent);
+                finish(); // Ensure GameActivity is removed from the stack
             }
 
-            // Set the buffer to block further processing for 2 seconds
+            // Set the buffer to block further processing for 500 milliseconds
             isProcessing = true;
-            new android.os.Handler().postDelayed(() -> isProcessing = false, 500); // 2-second delay
+            new android.os.Handler().postDelayed(() -> isProcessing = false, 500);
         }
     }
 

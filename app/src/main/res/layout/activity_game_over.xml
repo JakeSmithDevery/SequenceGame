@@ -35,8 +35,8 @@
         android:id="@+id/btnSaveScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Save Score"
-        android:visibility="gone"
+        android:text="Play Again"
+        android:visibility="visible"
         android:layout_marginTop="20dp" />
 
     <Button
